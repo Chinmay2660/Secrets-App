@@ -1,11 +1,10 @@
-
 body {
-  background-color: #E8ECEF;
+  background-color: #e8ecef;
 }
 
 .centered {
-    padding-top: 200px;
-    text-align: center;
+  padding-top: 200px;
+  text-align: center;
 }
 
 .secret-text {
@@ -13,4 +12,16 @@ body {
   font-size: 2rem;
   color: #fff;
   background-color: #000;
+}
+
+.footer {
+  position: fixed;
+  width: 100%;
+  height: auto;
+  color: white !important;
+  background-color: #000336;
+  text-align: center;
+  bottom: 0;
+  padding: 20px 0; /* Add padding to create space between text and bottom line */
+  box-sizing: border-box; /* Include padding in the height calculation */
 }
