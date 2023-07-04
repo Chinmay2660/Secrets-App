@@ -19,7 +19,7 @@ const userSchema = new mongoose.Schema({
   password: String,
 });
 
-const secret = "Thisisourlittlesecret."; // Secret key for encryption
+const secret = "Thisisourlittlesecret"; // Secret key for encryption
 userSchema.plugin(encrypt, { secret: secret, encryptedFields: ["password"] }); // Encrypting the password field
 
 const User = new mongoose.model("User", userSchema); // Model for the database
