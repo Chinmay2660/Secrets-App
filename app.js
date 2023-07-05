@@ -1,4 +1,5 @@
 //jshint esversion:6
+require("dotenv").config(); // To use the .env file
 const express = require("express");
 const bodyParser = require("body-parser");
 const ejs = require("ejs");
@@ -6,6 +7,8 @@ const mongoose = require("mongoose");
 const encrypt = require("mongoose-encryption"); // Encryption package
 
 const app = express();
+
+console.log(process.env.API_KEY); // To use the .env file
 
 app.use(express.static("public"));
 app.set("view engine", "ejs");
@@ -19,8 +22,10 @@ const userSchema = new mongoose.Schema({
   password: String,
 });
 
-const secret = "Thisisourlittlesecret"; // Secret key for encryption
-userSchema.plugin(encrypt, { secret: secret, encryptedFields: ["password"] }); // Encrypting the password field
+userSchema.plugin(encrypt, {
+  secret: process.env.SECRET,
+  encryptedFields: ["password"],
+}); // Encrypting the password field
 
 const User = new mongoose.model("User", userSchema); // Model for the database
 
@@ -107,7 +112,7 @@ app.post("/login", function (req, res) {
         } else {
           res.render("login", {
             // If the password is incorrect
-            errMsg: "Email or password is incorrect", // Displaying the error message
+            errMsg: "Entered Email or Password is incorrect", // Displaying the error message
             username: username,
             password: password,
           });
