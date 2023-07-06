@@ -16,7 +16,7 @@ const findOrCreate = require("mongoose-findorcreate"); // Passport package
 
 const app = express();
 
-console.log(process.env.API_KEY); // To use the .env file
+// console.log(process.env.API_KEY); // To use the .env file
 
 app.use(express.static("public"));
 app.set("view engine", "ejs");
@@ -41,7 +41,11 @@ const userSchema = new mongoose.Schema({
   // Schema for the database
   email: String, // email and password are the fields in the database
   password: String,
-  googleId: String,
+  googleId: {
+    type: String,
+    unique: true,
+  },
+  secret: [{ type: String }],
 });
 
 userSchema.plugin(passportLocalMongoose); // Using passport for local mongoose
@@ -116,9 +120,46 @@ app.get("/register", function (req, res) {
 
 app.get("/secrets", function (req, res) {
   // Secrets route
+  // if (req.isAuthenticated()) {
+  //   // If the user is authenticated
+  //   res.render("secrets"); // Rendering the secrets page
+  // } else {
+  //   res.redirect("/login"); // Redirecting to the login page
+  // }
+  User.find({ secret: { $ne: null } })
+    .then((foundUsers) => {
+      // Finding the users with secrets
+      let innerHTML = "Loading";
+      let href = "/secrets";
+
+      // Fixed: Log Out button even if user is not logged in.
+      if (req.isAuthenticated()) {
+        innerHTML = "Log Out";
+        href = "/logout";
+      } else {
+        innerHTML = "Log In";
+        href = "/login";
+      }
+      if (foundUsers) {
+        // If the users are found
+        res.render("secrets", {
+          usersWithSecrets: foundUsers,
+          logOutBtnText: innerHTML,
+          logOutBtnLink: href,
+        }); // Rendering the secrets page
+      }
+    })
+    .catch((err) => {
+      // Handling any errors that occur during the process
+      console.log(err);
+    });
+});
+
+app.get("/submit", function (req, res) {
+  // Submit route
   if (req.isAuthenticated()) {
     // If the user is authenticated
-    res.render("secrets"); // Rendering the secrets page
+    res.render("submit"); // Rendering the submit page
   } else {
     res.redirect("/login"); // Redirecting to the login page
   }
@@ -267,6 +308,29 @@ app.post("/login", function (req, res) {
   });
 });
 
-app.listen(3000, function () {
+app.post("/submit", function (req, res) {
+  // Submit route
+  const submittedSecret = req.body.secret; // Getting the secret from the form
+
+  User.findById(req.user.id)
+    .then((foundUser) => {
+      // Finding the user
+      if (foundUser) {
+        // If the user is found
+        foundUser.secret.push(submittedSecret);
+        return foundUser.save(); // Saving the secret and returning the promise
+      }
+    })
+    .then(() => {
+      // Redirecting to the secrets page after the secret is saved
+      res.redirect("/secrets");
+    })
+    .catch((err) => {
+      // Handling any errors that occur during the process
+      console.log(err);
+    });
+});
+
+app.listen(process.env.PORT || 3000, function () {
   console.log("Server started on port 3000");
 });
